@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices; 
 using System.Runtime.InteropServices;
 using Tizen.NUI.Binding;
 
@@ -5989,5 +5990,96 @@ namespace Tizen.NUI.BaseComponents
                 return AutomationId;
             }
         }
+
+         /// <summary>
+         /// Measures the view based on the available width and height.
+         /// </summary>
+         /// <param name="availableWidth">The available width for the view.</param>
+         /// <param name="availableHeight">The available height for the view.</param>
+         /// <returns>The measured size of the view.</returns>
+         public virtual Size Measure(float availableWidth, float availableHeight)
+         {
+             var width = DesiredWidth > 0 ? DesiredWidth : NaturalSize.Width;
+             var height = DesiredHeight > 0 ? DesiredHeight : NaturalSize.Height;
+             return new Size(width, height);
+         }
+
+         float _desiredWidth = float.NaN;
+
+         /// <summary>
+         /// Gets or sets the desired width of the view.
+         /// </summary>
+         /// <remarks>The setter calls <see cref="OnStylePropertySet"/> with name <c>DesiredWidth</c>.</remarks>
+         public float DesiredWidth
+         {
+             get => _desiredWidth;
+             set
+             {
+                 if (float.IsNaN(value) && float.IsNaN(_desiredWidth))
+                     return;
+                 if (_desiredWidth != value)
+                 {
+                     _desiredWidth = value;
+                     SendMeasureInvalidated();
+                 }
+                 OnStylePropertySet();
+             }
+         }
+
+         float _desiredHeight = float.NaN;
+
+         /// <summary>
+         /// Gets or sets the desired height of the view.
+         /// </summary>
+         /// <remarks>The setter calls <see cref="OnStylePropertySet"/> with name <c>DesiredHeight</c>.</remarks>
+         public float DesiredHeight
+         {
+             get => _desiredHeight;
+             set
+             {
+                 if (float.IsNaN(value) && float.IsNaN(_desiredHeight))
+                     return;
+                 if (_desiredHeight != value)
+                 {
+                     _desiredHeight = value;
+                     SendMeasureInvalidated();
+                 }
+                 OnStylePropertySet();
+             }
+         }
+
+         /// <summary>
+         /// Sends a measure invalidated event to the view.
+         /// </summary>
+         public void SendMeasureInvalidated()
+         {
+             OnMeasureInvalidatedOverride();
+             MeasureInvalidated?.Invoke(this, EventArgs.Empty);
+         }
+
+         /// <summary>
+         /// Method called when the MeasureInvalidated event occurs.
+         /// </summary>
+         /// <remarks>
+         /// This method is called when the MeasureInvalidated event occurs and can be overridden in derived classes.
+         /// By default, this method is empty, and derived classes can implement their own logic.
+         /// </remarks>
+         protected virtual void OnMeasureInvalidatedOverride()
+         {
+         }
+
+         /// <summary>
+         /// Occurs when the measure of the view is invalidated.
+         /// </summary>
+         public event EventHandler MeasureInvalidated;
+
+         /// <summary>
+         /// Called after style related property setter is called.
+         /// </summary>
+         /// <param name="propertyName">The name of property.</param>
+         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+         protected virtual void OnStylePropertySet([CallerMemberName] string propertyName = "")
+         {
+         }
     }
 }
